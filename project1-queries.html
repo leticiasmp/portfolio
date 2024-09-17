@@ -1,0 +1,1609 @@
+<!DOCTYPE HTML>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Politicians for sale!</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo"><strong>Leticia Sampaio</strong> </a>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<ul class="links">
+							<li><a href="index.html">Come in</a></li>
+							<li><a href="landing.html">Projects</a></li>
+							<li><a href="aboutme.html">About me</a></li>
+							<!-- <li><a href="elements.html">Contact</a></li> -->
+						</ul>
+						<!-- <ul class="actions stacked">
+							<li><a href="#" class="button primary fit">Get Started</a></li>
+							<li><a href="#" class="button fit">Log In</a></li>
+						</ul> -->
+					</nav>
+
+				<!-- Main -->
+					<div id="main" class="alt">
+
+						<!-- Cleaning -->
+							<section id="one">
+								<div class="inner">
+									<header class="major">
+									<h1>Politicians for sale!</h1>
+									</header>
+									<h2>Datasets</h2>
+									<p><a href="https://basedosdados.org/dataset/eef764df-bde8-4905-b115-6fc23b6ba9d6?table=2e204854-e453-4257-9fef-5e10f3ff1f56">Candidates</a><br>
+									<a href="https://basedosdados.org/dataset/eef764df-bde8-4905-b115-6fc23b6ba9d6?table=2e204854-e453-4257-9fef-5e10f3ff1f56">Candidates' income</a><br>
+									<a href="https://basedosdados.org/dataset/eef764df-bde8-4905-b115-6fc23b6ba9d6?table=2e204854-e453-4257-9fef-5e10f3ff1f56">Candidates results</a></p>
+									
+									<h2>Context</h2>
+									<h3>Queries</h3>
+									<h3>Average age of elected politicians</h3>
+
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato 
+										WHERE ano = 2022 
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos 
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+									)
+									
+									SELECT ROUND(AVG(idade), 2) AS media_idade
+									FROM candidatos_eleitos
+									</code></pre>
+
+									<h3>Percentage of elected politicians by gender</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, *
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato 
+										WHERE ano = 2022 AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+										),
+
+									candidatos_eleitos AS (
+										SELECT *
+										FROM basedosdados.br_tse_eleicoes.candidatos JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato 
+										WHERE candidatos.ano = 2022
+										),
+
+									total AS (
+										SELECT COUNT(*) AS num_total
+										FROM candidatos_eleitos
+										WHERE genero IN ('masculino', 'feminino')
+										)
+
+									SELECT genero, ROUND(((COUNT(genero)/total.num_total) * 100), 2) AS porcentagem_gen
+									FROM candidatos_eleitos, total
+									WHERE genero IN ('masculino', 'feminino')
+									GROUP BY genero, total.num_total
+									ORDER BY porcentagem_gen DESC
+									</code></pre>
+
+									<h3>Percentage of elected politicians by race</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato 
+										WHERE ano = 2022 
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos 
+										JOIN resultado_eleicoes 
+										ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+									),
+
+									tabela_racas AS (
+										SELECT *, CASE
+											WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'nao branca'
+											WHEN raca IN ('nao informado', NULL) THEN 'nao informado'
+											ELSE 'branca'
+										END AS racas
+										FROM candidatos_eleitos
+									),
+
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2022 
+										AND racas NOT IN ('nao informado')
+									)
+
+									SELECT racas, ROUND((COUNT(tabela_racas.racas) / total.num_total * 100), 2) AS porcentagem_rac
+									FROM tabela_racas, total
+									WHERE ano = 2022 
+									AND racas NOT IN ('nao informado')
+									GROUP BY racas, total.num_total
+									ORDER BY 2 DESC
+
+									</code></pre>
+
+									<h3>Average declared income of elected politicians</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato 
+										WHERE ano = 2022 
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos 
+										JOIN resultado_eleicoes 
+										ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+									),
+
+									valor_candidatos AS (
+										SELECT id_candidato_bd, SUM(valor_item) AS valor_total
+										FROM basedosdados.br_tse_eleicoes.bens_candidato 
+										WHERE id_candidato_bd IS NOT NULL
+										GROUP BY id_candidato_bd
+									)
+
+									SELECT ROUND(AVG(valor_candidatos.valor_total), 2) AS media_receita
+									FROM valor_candidatos
+									JOIN candidatos_eleitos 
+									ON candidatos_eleitos.id_candidato_bd = valor_candidatos.id_candidato_bd
+									</code></pre>
+
+									<h3>Percentage of elected politicians by level of education</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato 
+										WHERE ano = 2022 
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos 
+										JOIN resultado_eleicoes 
+										ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+									),
+
+									total AS (
+										SELECT COUNT(*) AS num_total 
+										FROM candidatos_eleitos 
+										WHERE instrucao IS NOT NULL
+									)
+
+									SELECT instrucao, 
+										ROUND((COUNT(instrucao) / total.num_total * 100), 2) AS porcentagem_inst
+									FROM candidatos_eleitos
+									JOIN total 
+									ON 1 = 1  -- Adiciona uma condição de JOIN triviais
+									WHERE instrucao IS NOT NULL
+									GROUP BY instrucao, total.num_total
+									ORDER BY porcentagem_inst DESC;
+									</code></pre>
+									
+									<h2>Representativeness</h2>
+									<h3>Queries</h3>
+									<h3>Representation by gender in candidacies</h3>
+									<h3>Federal Deputy by Gender</h3>
+									<pre><code>
+									SELECT genero,
+										ROUND(((COUNT(candidatos.genero) / total.num_total) * 100), 2) AS porcentagem_genero
+									FROM basedosdados.br_tse_eleicoes.candidatos AS candidatos
+									JOIN (
+										SELECT COUNT(*) AS num_total
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										WHERE ano = 2022
+										AND cargo = 'deputado federal'
+										AND genero IN ('feminino', 'masculino')
+									) total ON 1 = 1
+									WHERE ano = 2022
+									AND cargo = 'deputado federal'
+									AND genero IN ('feminino', 'masculino')
+									GROUP BY genero, total.num_total
+									ORDER BY porcentagem_genero DESC
+									</code></pre>
+								
+									<h3>State Deputy by Gender</h3>
+									<pre><code>
+									SELECT genero,
+										ROUND(((COUNT(candidatos.genero) / total.num_total) * 100), 2) AS porcentagem_genero
+									FROM basedosdados.br_tse_eleicoes.candidatos AS candidatos
+									JOIN (
+										SELECT COUNT(*) AS num_total
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										WHERE ano = 2022
+										AND cargo = 'deputado estadual'
+										AND genero IN ('feminino', 'masculino')
+									) total ON 1 = 1
+									WHERE ano = 2022
+									AND cargo = 'deputado estadual'
+									AND genero IN ('feminino', 'masculino')
+									GROUP BY genero, total.num_total
+									ORDER BY porcentagem_genero DESC
+									</code></pre>
+
+								    <h3>Senator by Gender</h3>
+									<pre><code>
+									SELECT genero,
+										ROUND(((COUNT(candidatos.genero) / total.num_total) * 100), 2) AS porcentagem_genero
+									FROM basedosdados.br_tse_eleicoes.candidatos AS candidatos
+									JOIN (
+										SELECT COUNT(*) AS num_total
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										WHERE ano = 2022
+										AND cargo = 'senador'
+										AND genero IN ('feminino', 'masculino')
+									) total ON 1 = 1
+									WHERE ano = 2022
+									AND cargo = 'senador'
+									AND genero IN ('feminino', 'masculino')
+									GROUP BY genero, total.num_total
+									ORDER BY porcentagem_genero DESC
+									</code></pre>
+
+									<h3>Governor by Gender</h3>
+									<pre><code>
+									SELECT genero,
+										ROUND(((COUNT(candidatos.genero) / total.num_total) * 100), 2) AS porcentagem_genero
+									FROM basedosdados.br_tse_eleicoes.candidatos AS candidatos
+									JOIN (
+										SELECT COUNT(*) AS num_total
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										WHERE ano = 2022
+										AND cargo = 'governador'
+										AND genero IN ('feminino', 'masculino')
+									) total ON 1 = 1
+									WHERE ano = 2022
+									AND cargo = 'governador'
+									AND genero IN ('feminino', 'masculino')
+									GROUP BY genero, total.num_total
+									ORDER BY porcentagem_genero DESC
+									</code></pre>
+
+									<h3>Mayor by Gender</h3>
+									<pre><code>
+									SELECT genero,
+										ROUND(((COUNT(candidatos.genero) / total.num_total) * 100), 2) AS porcentagem_genero
+									FROM basedosdados.br_tse_eleicoes.candidatos AS candidatos
+									JOIN (
+										SELECT COUNT(*) AS num_total
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										WHERE ano = 2020
+										AND cargo = 'prefeito'
+										AND genero IN ('feminino', 'masculino')
+									) total ON 1 = 1
+									WHERE ano = 2020
+									AND cargo = 'prefeito'
+									AND genero IN ('feminino', 'masculino')
+									GROUP BY genero, total.num_total
+									ORDER BY porcentagem_genero DESC
+									</code></pre>
+
+									<h3>City Councilor by Gender</h3>
+									<pre><code>
+									SELECT genero,
+										ROUND(((COUNT(candidatos.genero) / total.num_total) * 100), 2) AS porcentagem_genero
+									FROM basedosdados.br_tse_eleicoes.candidatos AS candidatos
+									JOIN (
+										SELECT COUNT(*) AS num_total
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										WHERE ano = 2020
+										AND cargo = 'vereador'
+										AND genero IN ('feminino', 'masculino')
+									) total ON 1 = 1
+									WHERE ano = 2020
+									AND cargo = 'vereador'
+									AND genero IN ('feminino', 'masculino')
+									GROUP BY genero, total.num_total
+									ORDER BY porcentagem_genero DESC
+									</code></pre>
+
+									<h3>Representation by race in candidacies</h3>
+									<h3>Federal Deputy by Race</h3>
+									<pre><code>
+									WITH tabela_racas AS (
+										SELECT *,
+											   CASE
+												   WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'non-white'
+												   WHEN raca IN ('nao informado', NULL) THEN 'not informed'
+												   ELSE 'white'
+											   END AS racas
+										FROM `basedosdados.br_tse_eleicoes.candidatos`
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2022
+										  AND cargo = 'deputado federal'
+										  AND racas NOT IN ('not informed')
+									)
+									SELECT tabela_racas.racas,
+										   ROUND(((COUNT(tabela_racas.racas) / total.num_total) * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2022
+									  AND cargo = 'deputado federal'
+									  AND racas NOT IN ('not informed')
+									GROUP BY tabela_racas.racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+									
+									<h3>State Deputy by Race</h3>
+									<pre><code>
+									WITH tabela_racas AS (
+										SELECT *,
+											   CASE
+												   WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'non-white'
+												   WHEN raca IN ('nao informado', NULL) THEN 'not informed'
+												   ELSE 'white'
+											   END AS racas
+										FROM `basedosdados.br_tse_eleicoes.candidatos`
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2022
+										  AND cargo = 'deputado estadual'
+										  AND racas NOT IN ('not informed')
+									)
+									SELECT tabela_racas.racas,
+										   ROUND(((COUNT(tabela_racas.racas) / total.num_total) * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2022
+									  AND cargo = 'deputado estadual'
+									  AND racas NOT IN ('not informed')
+									GROUP BY tabela_racas.racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+									
+									<h3>Senator by Race</h3>
+									<pre><code>
+									WITH tabela_racas AS (
+										SELECT *,
+											   CASE
+												   WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'non-white'
+												   WHEN raca IN ('nao informado', NULL) THEN 'not informed'
+												   ELSE 'white'
+											   END AS racas
+										FROM `basedosdados.br_tse_eleicoes.candidatos`
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2022
+										  AND cargo = 'senador'
+										  AND racas NOT IN ('not informed')
+									)
+									SELECT tabela_racas.racas,
+										   ROUND(((COUNT(tabela_racas.racas) / total.num_total) * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2022
+									  AND cargo = 'senador'
+									  AND racas NOT IN ('not informed')
+									GROUP BY tabela_racas.racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+									<h3>Governor by Race</h3>
+									<pre><code>
+									WITH tabela_racas AS (
+										SELECT *,
+											   CASE
+												   WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'non-white'
+												   WHEN raca IN ('nao informado', NULL) THEN 'not informed'
+												   ELSE 'white'
+											   END AS racas
+										FROM `basedosdados.br_tse_eleicoes.candidatos`
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2022
+										  AND cargo = 'governador'
+										  AND racas NOT IN ('not informed')
+									)
+									SELECT tabela_racas.racas,
+										   ROUND(((COUNT(tabela_racas.racas) / total.num_total) * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2022
+									  AND cargo = 'governador'
+									  AND racas NOT IN ('not informed')
+									GROUP BY tabela_racas.racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+									
+									<h3>Mayor by Race</h3>
+									<pre><code>
+									WITH tabela_racas AS (
+										SELECT *,
+											   CASE
+												   WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'non-white'
+												   WHEN raca IN ('nao informado', NULL) THEN 'not informed'
+												   ELSE 'white'
+											   END AS racas
+										FROM `basedosdados.br_tse_eleicoes.candidatos`
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2020
+										  AND cargo = 'prefeito'
+										  AND racas NOT IN ('not informed')
+									)
+									SELECT tabela_racas.racas,
+										   ROUND(((COUNT(tabela_racas.racas) / total.num_total) * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2020
+									  AND cargo = 'prefeito'
+									  AND racas NOT IN ('not informed')
+									GROUP BY tabela_racas.racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+									
+									<h3>City Councilor by Race</h3>
+									<pre><code>
+									WITH tabela_racas AS (
+										SELECT *,
+											   CASE
+												   WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'non-white'
+												   WHEN raca IN ('nao informado', NULL) THEN 'not informed'
+												   ELSE 'white'
+											   END AS racas
+										FROM `basedosdados.br_tse_eleicoes.candidatos`
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2020
+										  AND cargo = 'vereador'
+										  AND racas NOT IN ('not informed')
+									)
+									SELECT tabela_racas.racas,
+										   ROUND(((COUNT(tabela_racas.racas) / total.num_total) * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2020
+									  AND cargo = 'vereador'
+									  AND racas NOT IN ('not informed')
+									GROUP BY tabela_racas.racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+
+									<h3>Representation by gender in elections</h3>
+									<h3>Federal Deputy by Gender</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										  AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+										  AND cargo = 'deputado federal'
+										  AND genero IN ('feminino', 'masculino')
+									)
+									SELECT genero,
+										   ROUND(((COUNT(candidatos_eleitos.genero) / total.num_total) * 100), 2) AS gender_percentage
+									FROM candidatos_eleitos,
+										 (SELECT COUNT(*) AS num_total
+										  FROM candidatos_eleitos) total
+									GROUP BY genero, total.num_total
+									ORDER BY gender_percentage DESC
+									</code></pre>
+									
+									<h3>State Deputy by Gender</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										  AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+										  AND cargo = 'deputado estadual'
+										  AND genero IN ('feminino', 'masculino')
+									)
+									SELECT genero,
+										   ROUND(((COUNT(candidatos_eleitos.genero) / total.num_total) * 100), 2) AS gender_percentage
+									FROM candidatos_eleitos,
+										 (SELECT COUNT(*) AS num_total
+										  FROM candidatos_eleitos) total
+									GROUP BY genero, total.num_total
+									ORDER BY gender_percentage DESC
+									</code></pre>
+									
+									<h3>Senator by Gender</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										  AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+										  AND cargo = 'senador'
+										  AND genero IN ('feminino', 'masculino')
+									)
+									SELECT genero,
+										   ROUND(((COUNT(candidatos_eleitos.genero) / total.num_total) * 100), 2) AS gender_percentage
+									FROM candidatos_eleitos,
+										 (SELECT COUNT(*) AS num_total
+										  FROM candidatos_eleitos) total
+									GROUP BY genero, total.num_total
+									ORDER BY gender_percentage DESC
+									</code></pre>
+									
+									<h3>Governor by Gender</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										  AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+										  AND cargo = 'governador'
+										  AND genero IN ('feminino', 'masculino')
+									)
+									SELECT genero,
+										   ROUND(((COUNT(candidatos_eleitos.genero) / total.num_total) * 100), 2) AS gender_percentage
+									FROM candidatos_eleitos,
+										 (SELECT COUNT(*) AS num_total
+										  FROM candidatos_eleitos) total
+									GROUP BY genero, total.num_total
+									ORDER BY gender_percentage DESC
+									</code></pre>
+
+									<h3>Mayor by Gender</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2020
+										  AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2020
+										  AND cargo = 'prefeito'
+										  AND genero IN ('feminino', 'masculino')
+									)
+									SELECT genero,
+										   ROUND(((COUNT(candidatos_eleitos.genero) / total.num_total) * 100), 2) AS gender_percentage
+									FROM candidatos_eleitos,
+										 (SELECT COUNT(*) AS num_total
+										  FROM candidatos_eleitos) total
+									GROUP BY genero, total.num_total
+									ORDER BY gender_percentage DESC
+									</code></pre>
+									
+									<h3>City Councilor by Gender</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2020
+										  AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2020
+										  AND cargo = 'vereador'
+										  AND genero IN ('feminino', 'masculino')
+									)
+									SELECT genero,
+										   ROUND(((COUNT(candidatos_eleitos.genero) / total.num_total) * 100), 2) AS gender_percentage
+									FROM candidatos_eleitos,
+										 (SELECT COUNT(*) AS num_total
+										  FROM candidatos_eleitos) total
+									GROUP BY genero, total.num_total
+									ORDER BY gender_percentage DESC
+									</code></pre>
+
+									<h3>Representation by race in elections</h3>
+									<h3>Federal Deputy by Race</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+									),
+									tabela_racas AS (
+										SELECT *, CASE
+											WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'nao branca'
+											WHEN raca IN ('nao informado', NULL) THEN 'nao informado'
+											ELSE 'branca'
+										END AS racas
+										FROM candidatos_eleitos
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2022
+										AND racas NOT IN ('nao informado')
+										AND cargo = 'deputado federal'
+									)
+									SELECT racas,
+										ROUND((COUNT(tabela_racas.racas) / total.num_total * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2022
+									AND racas NOT IN ('nao informado')
+									AND cargo = 'deputado federal'
+									GROUP BY racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+
+									<h3>State Deputy by Race</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+									),
+									tabela_racas AS (
+										SELECT *, CASE
+											WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'nao branca'
+											WHEN raca IN ('nao informado', NULL) THEN 'nao informado'
+											ELSE 'branca'
+										END AS racas
+										FROM candidatos_eleitos
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2022
+										AND racas NOT IN ('nao informado')
+										AND cargo = 'deputado estadual'
+									)
+									SELECT racas,
+										ROUND((COUNT(tabela_racas.racas) / total.num_total * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2022
+									AND racas NOT IN ('nao informado')
+									AND cargo = 'deputado estadual'
+									GROUP BY racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+
+									<h3>Senator by Race</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+									),
+									tabela_racas AS (
+										SELECT *, CASE
+											WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'nao branca'
+											WHEN raca IN ('nao informado', NULL) THEN 'nao informado'
+											ELSE 'branca'
+										END AS racas
+										FROM candidatos_eleitos
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2022
+										AND racas NOT IN ('nao informado')
+										AND cargo = 'senador'
+									)
+									SELECT racas,
+										ROUND((COUNT(tabela_racas.racas) / total.num_total * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2022
+									AND racas NOT IN ('nao informado')
+									AND cargo = 'senador'
+									GROUP BY racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+									<h3>Governor by Race</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2022
+									),
+									tabela_racas AS (
+										SELECT *, CASE
+											WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'nao branca'
+											WHEN raca IN ('nao informado', NULL) THEN 'nao informado'
+											ELSE 'branca'
+										END AS racas
+										FROM candidatos_eleitos
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2022
+										AND racas NOT IN ('nao informado')
+										AND cargo = 'governador'
+									)
+									SELECT racas,
+										ROUND((COUNT(tabela_racas.racas) / total.num_total * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2022
+									AND racas NOT IN ('nao informado')
+									AND cargo = 'governador'
+									GROUP BY racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+
+									<h3>Mayor by Race</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2020
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2020
+									),
+									tabela_racas AS (
+										SELECT *, CASE
+											WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'nao branca'
+											WHEN raca IN ('nao informado', NULL) THEN 'nao informado'
+											ELSE 'branca'
+										END AS racas
+										FROM candidatos_eleitos
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2020
+										AND racas NOT IN ('nao informado')
+										AND cargo = 'prefeito'
+									)
+									SELECT racas,
+										ROUND((COUNT(tabela_racas.racas) / total.num_total * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2020
+									AND racas NOT IN ('nao informado')
+									AND cargo = 'prefeito'
+									GROUP BY racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+
+									<h3>City Councilor by Race</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato, ano
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2020
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									candidatos_eleitos AS (
+										SELECT candidatos.*
+										FROM basedosdados.br_tse_eleicoes.candidatos
+										JOIN resultado_eleicoes ON candidatos.id_candidato_bd = resultado_eleicoes.id_candidato
+										WHERE candidatos.ano = 2020
+									),
+									tabela_racas AS (
+										SELECT *, CASE
+											WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'nao branca'
+											WHEN raca IN ('nao informado', NULL) THEN 'nao informado'
+											ELSE 'branca'
+										END AS racas
+										FROM candidatos_eleitos
+									),
+									total AS (
+										SELECT COUNT(tabela_racas.racas) AS num_total
+										FROM tabela_racas
+										WHERE ano = 2020
+										AND racas NOT IN ('nao informado')
+										AND cargo = 'vereador'
+									)
+									SELECT racas,
+										ROUND((COUNT(tabela_racas.racas) / total.num_total * 100), 2) AS race_percentage
+									FROM tabela_racas, total
+									WHERE ano = 2020
+									AND racas NOT IN ('nao informado')
+									AND cargo = 'vereador'
+									GROUP BY racas, total.num_total
+									ORDER BY race_percentage DESC
+									</code></pre>
+									<h2>Investment in applications</h2>
+									<h3>Queries</h3>
+									<h3>Total Value of Donations by Source</h3>
+									<pre><code>
+									SELECT origem_receita,
+										COUNT(*) AS numero_doacoes,
+										ROUND(SUM(valor_receita), 2) AS valor_doacoes
+									FROM `basedosdados.br_tse_eleicoes.receitas_candidato`
+									WHERE ano = 2022
+									GROUP BY origem_receita
+									ORDER BY numero_doacoes DESC
+									</code></pre>
+
+									<h3>Investments in Campaigns: Electoral Funds vs. Donations from Individuals</h3>
+									<pre><code>
+									SELECT origem_receita,
+										COUNT(*) AS numero_doacoes,
+										ROUND(SUM(valor_receita), 2) AS valor_doacoes
+									FROM `basedosdados.br_tse_eleicoes.receitas_candidato`
+									WHERE ano = 2022
+									AND origem_receita IN ('recursos de partido politico', 'recursos de pessoas fisicas')
+									GROUP BY origem_receita
+									ORDER BY valor_doacoes DESC
+									</code></pre>
+
+									<h3>Average Donation Value from Individuals</h3>
+									<pre><code>
+									SELECT ROUND(AVG(valor_receita), 2) AS media_receita
+									FROM `basedosdados.br_tse_eleicoes.receitas_candidato`
+									WHERE ano = 2022
+									AND origem_receita = 'recursos de pessoas fisicas'
+									</code></pre>
+
+									<h3>Top 10 Donors of the 2022 Elections</h3>
+									<pre><code>
+									SELECT cpf_cnpj_doador,
+										SUM(valor_receita) AS valor_total,
+										CASE
+											WHEN nome_doador = 'JOSÉ SALIM MATTAR JUNIOR' THEN 'JOSE SALIM MATTAR JUNIOR'
+											ELSE nome_doador
+										END AS nomes_doadores
+									FROM basedosdados.br_tse_eleicoes.receitas_candidato
+									WHERE ano = 2022
+									AND origem_receita = 'recursos de pessoas fisicas'
+									GROUP BY cpf_cnpj_doador, nomes_doadores
+									ORDER BY valor_total DESC
+									LIMIT 10
+									</code></pre>
+									<h3>Percentage of Politicians Receiving 80% of Donations from Individuals</h3>
+									<pre><code>
+									WITH porcentagem_cand AS (
+										SELECT ano,
+											   id_candidato_bd,
+											   nome_candidato,
+											   ((SUM(valor_receita)/total.valor_total) * 100) AS porc_doacao
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato,
+											 (
+												 SELECT SUM(valor_receita) AS valor_total 
+												 FROM basedosdados.br_tse_eleicoes.receitas_candidato
+												 WHERE ano = 2022
+												   AND origem_receita = 'recursos de pessoas fisicas'
+											 ) total
+										WHERE ano = 2022
+										  AND origem_receita = 'recursos de pessoas fisicas'
+										GROUP BY ano, id_candidato_bd, nome_candidato, total.valor_total
+										ORDER BY porc_doacao DESC
+									),
+									soma_cum_cand AS (
+										SELECT nome_candidato,
+											   SUM(porc_doacao) OVER(PARTITION BY ano ORDER BY porc_doacao DESC) AS sum_porc
+										FROM porcentagem_cand
+									),
+									restr_porc AS (
+										SELECT nome_candidato, sum_porc
+										FROM soma_cum_cand
+										WHERE sum_porc <= 80
+									)
+									SELECT ROUND((COUNT(restr_porc.nome_candidato)/total.num_total * 100), 2) AS porcentagem
+									FROM restr_porc,
+										 (
+											 SELECT COUNT(nome_candidato) AS num_total
+											 FROM (
+												 SELECT nome_candidato
+												 FROM basedosdados.br_tse_eleicoes.receitas_candidato
+												 WHERE ano = 2022
+												   AND origem_receita = 'recursos de pessoas fisicas'
+												 GROUP BY nome_candidato
+											 ) total_cand
+										 ) total
+									GROUP BY total.num_total
+									</code></pre>
+									
+									<h3>Average Investment per Candidate in General</h3>
+									<pre><code>
+									SELECT ROUND(AVG(valor_total), 2) AS media_candidato
+									FROM (
+										SELECT cpf_candidato,
+											   ano,
+											   SUM(valor_receita) AS valor_total
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										WHERE ano = 2022
+										  AND origem_receita = 'recursos de pessoas fisicas'
+										GROUP BY cpf_candidato, ano
+										ORDER BY valor_total DESC
+									) cands_2022
+									</code></pre>
+									
+									<h3>Average Investment per Candidate by Race</h3>
+									<pre><code>
+									WITH total_cand AS (
+										SELECT receitas_candidato.valor_receita,
+											   receitas_candidato.id_candidato_bd AS id_cand,
+											   candidatos.cpf,
+											   candidatos.raca,
+											   candidatos.id_candidato_bd
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN basedosdados.br_tse_eleicoes.candidatos
+										  ON candidatos.id_candidato_bd = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										  AND candidatos.ano = 2022
+										  AND receitas_candidato.origem_receita = 'recursos de pessoas fisicas'
+									),
+									cands_2022 AS (
+										SELECT cpf,
+											   raca,
+											   SUM(valor_receita) AS valor_total
+										FROM total_cand
+										GROUP BY cpf, raca
+									),
+									tabela_racas AS (
+										SELECT *,
+											   CASE
+												   WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') THEN 'nao branca'
+												   WHEN raca IN ('nao informado', NULL) THEN 'nao informado'
+												   ELSE 'branca'
+											   END AS racas
+										FROM cands_2022
+									)
+									SELECT racas,
+										   ROUND(AVG(valor_total), 2) AS media_receita
+									FROM tabela_racas
+									WHERE racas NOT IN ('nao informado')
+									GROUP BY racas
+									ORDER BY media_receita DESC
+									</code></pre>
+									<h3>Average Investment per Candidate by Gender</h3>
+									<pre><code>
+									WITH total_cand AS (
+										SELECT receitas_candidato.valor_receita,
+											   receitas_candidato.id_candidato_bd AS id_cand,
+											   candidatos.cpf,
+											   candidatos.genero,
+											   candidatos.id_candidato_bd
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN basedosdados.br_tse_eleicoes.candidatos
+										  ON candidatos.id_candidato_bd = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										  AND candidatos.ano = 2022
+										  AND receitas_candidato.origem_receita = 'recursos de pessoas fisicas'
+									),
+									cands_2022 AS (
+										SELECT cpf,
+											   genero,
+											   SUM(valor_receita) AS valor_total
+										FROM total_cand
+										WHERE genero IN ('masculino', 'feminino')
+										GROUP BY cpf, genero
+									)
+									SELECT genero,
+										   ROUND(AVG(valor_total), 2) AS media_receita
+									FROM cands_2022
+									GROUP BY genero
+									ORDER BY media_receita DESC
+									</code></pre>
+									
+									<h3>Average Investment per Candidate by Race and Gender</h3>
+									<pre><code>
+									WITH total_cand AS (
+										SELECT receitas_candidato.valor_receita,
+											   receitas_candidato.id_candidato_bd AS id_cand,
+											   candidatos.cpf,
+											   candidatos.raca,
+											   candidatos.genero,
+											   candidatos.id_candidato_bd
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN basedosdados.br_tse_eleicoes.candidatos
+										  ON candidatos.id_candidato_bd = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										  AND candidatos.ano = 2022
+										  AND receitas_candidato.origem_receita = 'recursos de pessoas fisicas'
+									),
+									cands_2022 AS (
+										SELECT cpf,
+											   raca,
+											   genero,
+											   SUM(valor_receita) AS valor_total
+										FROM total_cand
+										GROUP BY cpf, raca, genero
+									),
+									tabela_raca_genero AS (
+										SELECT *,
+											   CASE
+												   WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') AND genero = 'feminino' THEN 'mulher nao branca'
+												   WHEN raca IN ('indigena', 'parda', 'preta', 'amarela') AND genero = 'masculino' THEN 'homem nao branco'
+												   WHEN raca IN ('branca') AND genero = 'feminino' THEN 'mulher branca'
+												   WHEN raca IN ('branca') AND genero = 'masculino' THEN 'homem branco'
+												   ELSE 'nao informado'
+											   END AS raca_genero
+										FROM cands_2022
+									)
+									SELECT raca_genero,
+										   ROUND(AVG(valor_total), 2) AS media_receita
+									FROM tabela_raca_genero
+									WHERE raca_genero NOT IN ('nao informado')
+									GROUP BY raca_genero
+									ORDER BY media_receita DESC
+									</code></pre>
+									<h3>Top 10 Parties Receiving Investments from Individuals</h3>
+									<pre><code>
+									SELECT sigla_partido,
+										   ROUND(SUM(valor_receita), 2) AS valor_invest
+									FROM basedosdados.br_tse_eleicoes.receitas_candidato
+									WHERE ano = 2022
+									  AND origem_receita = 'recursos de pessoas fisicas'
+									GROUP BY sigla_partido
+									ORDER BY valor_invest DESC
+									LIMIT 10
+									</code></pre>
+									
+									<h2>Investments by elected vs. non-elected candidates</h2>
+									<h3>Average Investment per Elected Candidate</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											ano,
+											cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										AND origem_receita = 'recursos de pessoas fisicas'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+
+									<h3>Average Investment per Non-Elected Candidate</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											ano,
+											cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('nao eleito', 'suplente')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										AND origem_receita = 'recursos de pessoas fisicas'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+
+									<h3>Average Investment for Elected vs Non-Elected Federal Deputies</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											ano,
+											cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										AND origem_receita = 'recursos de pessoas fisicas'
+										AND resultado_eleicoes.cargo = 'deputado federal'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											ano,
+											cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('nao eleito', 'suplente')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										AND origem_receita = 'recursos de pessoas fisicas'
+										AND resultado_eleicoes.cargo = 'deputado federal'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+									<h3>Average Investment for Elected vs Non-Elected State Deputies</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											ano,
+											cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										AND origem_receita = 'recursos de pessoas fisicas'
+										AND resultado_eleicoes.cargo = 'deputado estadual'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											ano,
+											cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('nao eleito', 'suplente')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										AND origem_receita = 'recursos de pessoas fisicas'
+										AND resultado_eleicoes.cargo = 'deputado estadual'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+
+									<h3>Average Investment for Elected vs Non-Elected Senators</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											ano,
+											cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										AND origem_receita = 'recursos de pessoas fisicas'
+										AND resultado_eleicoes.cargo = 'senador'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											ano,
+											cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										AND resultado IN ('nao eleito', 'suplente')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										AND origem_receita = 'recursos de pessoas fisicas'
+										AND resultado_eleicoes.cargo = 'senador'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+									<h3>Average Investment for Elected vs Non-Elected Governors</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											   ano,
+											   cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										  AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											   resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										  ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										  AND origem_receita = 'recursos de pessoas fisicas'
+										  AND resultado_eleicoes.cargo = 'governador'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											   SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+									
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											   ano,
+											   cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2022
+										  AND resultado IN ('nao eleito', 'suplente')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											   resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										  ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2022
+										  AND origem_receita = 'recursos de pessoas fisicas'
+										  AND resultado_eleicoes.cargo = 'governador'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											   SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+									
+									<h3>Average Investment for Elected vs Non-Elected Mayors</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											   ano,
+											   cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2020
+										  AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											   resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										  ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2020
+										  AND origem_receita = 'recursos de pessoas fisicas'
+										  AND resultado_eleicoes.cargo = 'prefeito'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											   SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+									
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											   ano,
+											   cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2020
+										  AND resultado IN ('nao eleito', 'suplente')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											   resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										  ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2020
+										  AND origem_receita = 'recursos de pessoas fisicas'
+										  AND resultado_eleicoes.cargo = 'prefeito'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											   SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+									<h3>Average Investment for Elected vs Non-Elected City Councilors</h3>
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											   ano,
+											   cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2020
+										  AND resultado IN ('eleito por qp', 'eleito por media', 'eleito', '2º turno')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											   resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										  ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2020
+										  AND origem_receita = 'recursos de pessoas fisicas'
+										  AND resultado_eleicoes.cargo = 'vereador'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											   SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+									
+									<pre><code>
+									WITH resultado_eleicoes AS (
+										SELECT id_candidato_bd AS id_candidato,
+											   ano,
+											   cargo
+										FROM basedosdados.br_tse_eleicoes.resultados_candidato
+										WHERE ano = 2020
+										  AND resultado IN ('nao eleito', 'suplente')
+									),
+									receita_eleitos AS (
+										SELECT receitas_candidato.*,
+											   resultado_eleicoes.*
+										FROM basedosdados.br_tse_eleicoes.receitas_candidato
+										JOIN resultado_eleicoes
+										  ON resultado_eleicoes.id_candidato = receitas_candidato.id_candidato_bd
+										WHERE receitas_candidato.ano = 2020
+										  AND origem_receita = 'recursos de pessoas fisicas'
+										  AND resultado_eleicoes.cargo = 'vereador'
+									),
+									sum_eleitos_cpf AS (
+										SELECT cpf_candidato,
+											   SUM(valor_receita) AS valor_total
+										FROM receita_eleitos
+										GROUP BY cpf_candidato
+									)
+									SELECT ROUND(AVG(valor_total), 2) AS media_invest
+									FROM sum_eleitos_cpf
+									</code></pre>
+																		
+
+									
+								</div>
+							</section>
+
+					</div>
+
+				<!-- Contact -->
+					<!-- <section id="contact">
+						<div class="inner">
+							<section>
+								<form method="post" action="#">
+									<div class="fields">
+										<div class="field half">
+											<label for="name">Name</label>
+											<input type="text" name="name" id="name" />
+										</div>
+										<div class="field half">
+											<label for="email">Email</label>
+											<input type="text" name="email" id="email" />
+										</div>
+										<div class="field">
+											<label for="message">Message</label>
+											<textarea name="message" id="message" rows="6"></textarea>
+										</div>
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="Send Message" class="primary" /></li>
+										<li><input type="reset" value="Clear" /></li>
+									</ul>
+								</form>
+							</section> -->
+							<section id="contact">
+								<div class="inner">
+									<section class="split">
+										<section>
+											<div class="contact-method">
+												<span class="icon solid alt fa-envelope"></span>
+												<h3>Email</h3>
+												<a href="mailto:leticiaagsmp@gmail.com">leticiaagsmp@gmail.com</a>
+											</div>
+										</section>
+										<section>
+											<div class="contact-method">
+												<span class="icon solid alt fa-phone"></span>
+												<h3>Phone</h3>
+												<span>+55 (45) 998 116 228</span>
+											</div>
+										</section>
+									</section>
+								</div>
+							</section>
+								<!-- <section>
+									<div class="contact-method">
+										<span class="icon solid alt fa-home"></span>
+										<h3>Address</h3>
+										<span>1234 Somewhere Road #5432<br />
+										Nashville, TN 00000<br />
+										United States of America</span>
+									</div>
+								</section> -->
+							</section>
+						</div>
+					</section>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<div class="inner">
+							<ul class="icons">
+								<li><a href="https://www.instagram.com/leticia.smp/" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a></li>
+								<li><a href="https://github.com/leticiasmp" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+								<li><a href="https://www.linkedin.com/in/leticiaagsmp/" class="icon brands alt fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+							<!--</ul>
+							<ul class="copyright">
+								<li>&copy; Untitled</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+							</ul> -->
+						</div>
+					</footer>
+
+			</div>
+
+	<!-- Scripts -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/jquery.scrolly.min.js"></script>
+		<script src="assets/js/jquery.scrollex.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+	</body>
+</html>

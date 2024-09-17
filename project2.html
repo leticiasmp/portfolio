@@ -1,0 +1,225 @@
+<!DOCTYPE HTML>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>PowerBI Practices</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo"><strong>Leticia Sampaio</strong> </a>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<ul class="links">
+							<li><a href="index.html">Come in</a></li>
+							<li><a href="projects.html">Projects</a></li>
+							<li><a href="aboutme.html">About me</a></li>
+							<!-- <li><a href="elements.html">Contact</a></li> -->
+						<!-- </ul>
+						<ul class="actions stacked">
+							<li><a href="#" class="button primary fit">Get Started</a></li>
+							<li><a href="#" class="button fit">Log In</a></li>
+						</ul> -->
+					</nav>
+
+				<!-- Main -->
+					<div id="main" class="alt">
+
+					<!-- One -->
+					<section id="one">
+						<div class="inner">
+						<header class="major">
+							<h1>PowerBI Practices</h1>
+						</header>
+						<span class="image main"><img src="images/banner-project-2.png" alt="" /></span>
+						<p>The Data Science Academy's Microsoft Power BI aims to improve knowledge of the Microsoft Power BI tool and also to apply Data Science techniques to generate predictive models and extract insights for decision-making, integrating Power BI with R, DAX and Python.</p>
+						<p>In this course, I developed some practice projects within the tool, see below: </p>
+					
+						<h2>Marketing campaign analysis</h2>
+						<p>The project aims to illustrate metrics regarding customer vision, customer buying behavior, marketing campaign performance and buying patterns at the point of sale. To do this, we cleaned the data by removing outliers through the use of scatter plots and also performed calculations to extract sales data relevant to our analysis. </p>
+						
+						<span class="image main">
+							<a href="#pdfModal1"><img src="images/banner-project-2-mkt.png" alt="Banner" /></a>
+						</span>
+					
+						<!-- Marketing campaign analysis Modal -->
+						<div id="pdfModal1" class="modal">
+							<div class="modal-content">
+							<span class="close">&times;</span>
+							<iframe src="https://drive.google.com/file/d/1U4zjMHqahoy60hxWvAiR30wH8O2JQPri/preview" width="100%" height="600px"></iframe>
+							</div>
+						</div>
+					
+						<h2>Commercial Dashboard - Sales Performance</h2>
+						<p>In the project, I used metrics such as sales volume, average ticket, conversion rate, sales cycle, customer retention, among others, to present the current scenario of the sales team and its respective results. </p>
+					
+						<span class="image main">
+							<a href="#pdfModal2"><img src="images/banner-project-2-sales.png" alt="Banner" /></a>
+						</span>
+					
+						<!-- Commercial Dashboard - Sales Performance Modal -->
+						<div id="pdfModal2" class="modal">
+							<div class="modal-content">
+							<span class="close">&times;</span>
+							<iframe src="https://drive.google.com/file/d/1UARUk2Kx_NXjwCaPkqsvLenzxRb-U8Ae/preview" width="100%" height="600px"></iframe>
+							</div>
+						</div>
+
+						<h2>Logistics data analysis</h2>
+						<p>The activity sought to develop a dashboard that would provide an understanding of the company's product delivery process. To do this, data was used on total deliveries per channel, percentage of early deliveries per team, deliveries per month, salespeople with the highest number of deliveries and percentage of delivery statuses. </p>
+					
+						<span class="image main">
+							<a href="#pdfModal3"><img src="images/banner-project-2-logistics.png" alt="Banner" /></a>
+						</span>
+					
+						<!-- Logistics data analysis -->
+						<div id="pdfModal3" class="modal">
+							<div class="modal-content">
+							<span class="close">&times;</span>
+							<iframe src="https://drive.google.com/file/d/1UF7_B19ww0pRxG13oFgurQCKELMUPXFh/preview" width="100%" height="600px"></iframe>
+							</div>
+						</div>
+					
+						<script>
+							// Function to handle modals
+							function openModal(modalId) {
+							var modal = document.getElementById(modalId);
+							modal.style.display = "block";
+							
+							// Close modal when clicking the 'x'
+							modal.getElementsByClassName("close")[0].onclick = function() {
+								modal.style.display = "none";
+							};
+							
+							// Close modal when clicking outside of it
+							window.onclick = function(event) {
+								if (event.target == modal) {
+								modal.style.display = "none";
+								}
+							};
+							}
+					
+							// Open first modal
+							document.querySelector("a[href='#pdfModal1']").onclick = function() {
+							openModal('pdfModal1');
+							};
+					
+							// Open second modal
+							document.querySelector("a[href='#pdfModal2']").onclick = function() {
+							openModal('pdfModal2');
+							};
+
+							// Open third modal
+							document.querySelector("a[href='#pdfModal3']").onclick = function() {
+							openModal('pdfModal3');
+							};
+
+
+
+						</script>
+						</div>
+					</section>
+					
+
+				<!-- Contact -->
+					<!-- <section id="contact">
+						<div class="inner">
+							<section>
+								<form method="post" action="#">
+									<div class="fields">
+										<div class="field half">
+											<label for="name">Name</label>
+											<input type="text" name="name" id="name" />
+										</div>
+										<div class="field half">
+											<label for="email">Email</label>
+											<input type="text" name="email" id="email" />
+										</div>
+										<div class="field">
+											<label for="message">Message</label>
+											<textarea name="message" id="message" rows="6"></textarea>
+										</div>
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="Send Message" class="primary" /></li>
+										<li><input type="reset" value="Clear" /></li>
+									</ul>
+								</form>
+							</section> -->
+							<section id="contact">
+								<div class="inner">
+									<section class="split">
+										<section>
+											<div class="contact-method">
+												<span class="icon solid alt fa-envelope"></span>
+												<h3>Email</h3>
+												<a href="mailto:leticiaagsmp@gmail.com">leticiaagsmp@gmail.com</a>
+											</div>
+										</section>
+										<section>
+											<div class="contact-method">
+												<span class="icon solid alt fa-phone"></span>
+												<h3>Phone</h3>
+												<span>+55 (45) 998 116 228</span>
+											</div>
+										</section>
+									</section>
+								</div>
+							</section>
+								<!-- <section>
+									<div class="contact-method">
+										<span class="icon solid alt fa-home"></span>
+										<h3>Address</h3>
+										<span>1234 Somewhere Road #5432<br />
+										Nashville, TN 00000<br />
+										United States of America</span>
+									</div>
+								</section> -->
+							</section>
+						</div>
+					</section>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<div class="inner">
+							<ul class="icons">
+								<li><a href="https://www.instagram.com/leticia.smp/" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a></li>
+								<li><a href="https://github.com/leticiasmp" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+								<li><a href="https://www.linkedin.com/in/leticiaagsmp/" class="icon brands alt fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+							<!--</ul>
+							<ul class="copyright">
+								<li>&copy; Untitled</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+							</ul> -->
+						</div>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
