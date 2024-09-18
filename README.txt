@@ -1,10 +1,10 @@
-# Portfolio Website
+#Portfolio Website
 
 Welcome to my portfolio website! You can explore my projects, skills, and achievements by visiting the link below:
 
 [**Access My Portfolio Here**](https://leticiasmp.github.io/portfolio/)
 
-## Overview
+##Overview
 
 This website serves as a platform to showcase my work, skills, and professional experience. It includes various sections such as:
 
@@ -12,7 +12,7 @@ This website serves as a platform to showcase my work, skills, and professional 
 - **Projects**: Detailed descriptions and links to my major projects.
 - **About Me**: A little description about me.
 
-## Preview
+##Preview
 
 Here’s a preview of the homepage:
 
