@@ -3632,15 +3632,15 @@ input, select, textarea {
 
 #contact .inner {
     display: flex;
-    justify-content: center; /* Centraliza os elementos na horizontal */
-    align-items: center;     /* Alinha verticalmente */
-    gap: 3em; /* Espaçamento entre as seções */
-    flex-wrap: nowrap;       /* Garante que os itens fiquem em uma única linha */
+    justify-content: center; 
+    align-items: center;    
+    gap: 3em; 
+    flex-wrap: nowrap;     
 }
 
 .split {
     display: flex;
-    flex-direction: row; /* Alinha os itens em linha */
+    flex-direction: row; 
     justify-content: center;
     align-items: center;
     gap: 3em;
@@ -3650,7 +3650,7 @@ input, select, textarea {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 1em; /* Espaçamento entre o ícone e o conteúdo */
+    gap: 1em; 
 }
 
 .contact-method .icon {
@@ -3661,14 +3661,14 @@ input, select, textarea {
 /* Responsividade */
 @media screen and (max-width: 980px) {
     .inner {
-        flex-direction: column; /* Para telas menores, alinha em coluna */
+        flex-direction: column; 
     }
 }
 
 @media screen and (max-width: 736px) {
     .contact-method {
         padding: 1em 0;
-        flex-direction: column; /* Em telas menores, mudar para coluna */
+        flex-direction: column; 
         text-align: center;
     }
 }
@@ -3678,15 +3678,15 @@ input, select, textarea {
 
 #footer .inner {
     display: flex;
-    justify-content: center; /* Centraliza os ícones horizontalmente */
+    justify-content: center; 
     align-items: center;
-    flex-direction: column; /* Alinha os itens em coluna se necessário */
+    flex-direction: column; 
 }
 
 #footer .icons {
     display: flex;
-    justify-content: center; /* Centraliza os ícones */
-    gap: 1em; /* Espaçamento entre os ícones */
+    justify-content: center;
+    gap: 1em; 
     list-style: none;
     padding-left: 0;
 }
@@ -3694,14 +3694,15 @@ input, select, textarea {
 #footer .icons li {
     margin: 0;
 }
-
+z	height: 100%;
+	width: 100%;
 #footer .icons li a {
-    font-size: 1.0em; /* Tamanho do ícone */
-    color: rgba(255, 255, 255, 0.7); /* Cor dos ícones */
+    font-size: 1.0em;
+    color: rgba(255, 255, 255, 0.7); 
 }
 
 #footer .icons li a:hover {
-    color: #fff; /* Cor dos ícones ao passar o mouse */
+    color: #fff; 
 }
 
 /* Wrapper */
@@ -3916,7 +3917,7 @@ input, select, textarea {
 		}
 
 
-		/* Estilos para o modal */
+		
 .modal {
 	display: none; 
 	position: fixed;
@@ -3950,7 +3951,7 @@ input, select, textarea {
 	text-decoration: none;
 	cursor: pointer;
   }
-  /* Make the container a flexbox */
+  
 .flex-container {
     display: flex;
     justify-content: space-between; /* Space between the text and image */
@@ -3970,7 +3971,7 @@ input, select, textarea {
     max-width: 35%; /* Control the size of the image section */
 }
 
-/* Make the image responsive */
+
 .image-content img {
     width: 100%; /* Ensure the image takes up the full width of its container */
     height: auto; /* Maintain aspect ratio */
